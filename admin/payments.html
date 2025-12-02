@@ -1,0 +1,1239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>HomeGlitz — Payments</title>
+<link rel="icon" href="https://raw.githubusercontent.com/Levinders/homeglitz/refs/heads/main/64%C3%9764pxlogo.png" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --primary:#0F72B4; --primary-light:#f5faff; --panel:#fff; --muted:#6c757d;
+    --border:#e4e9ef; --radius:12px; --shadow:0 6px 20px rgba(15,114,180,0.08);
+    --text:#222;
+  }
+  *{box-sizing:border-box;font-family:'Montserrat',sans-serif}
+  html,body{height:100%;margin:0;background:var(--primary-light);color:#222}
+
+  /* ---- USER MENU + LOGOUT DROPDOWN ---- */
+.user-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+#userIcon {
+  cursor: pointer;
+  font-size: 18px;
+  transition: 0.2s ease;
+}
+
+#userIcon:hover {
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+/* Dropdown styling */
+.logout-dropdown {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  border-radius: 10px;
+  padding: 8px 0;
+  width: 160px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: 0.25s ease;
+  z-index: 2000;
+}
+
+.logout-dropdown.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Logout button */
+#logoutBtn {
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+#logoutBtn i {
+  color: var(--primary);
+}
+
+#logoutBtn:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+/* Align icons horizontally */
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.topbar-right i {
+  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+  /* ==========================
+     SIDEBAR (INSERTED BLOCK)
+     ========================== */
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 250px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+    overflow-y: auto;
+    z-index: 2000;
+  }
+
+  .sidebar .brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+  }
+
+  .sidebar .brand img {
+    height: 48px;
+  }
+
+  .nav-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .nav-item {
+    position: relative;
+  }
+
+  .nav-links li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 22px;
+    color: var(--muted);
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .nav-links li a:hover,
+  .nav-links li a.active {
+    background: var(--primary-light);
+    color: var(--primary);
+    border-left: 4px solid var(--primary);
+  }
+
+  .sub-menu {
+    display: none;
+    flex-direction: column;
+    margin-left: 40px;
+    font-size: 12px;
+  }
+
+  .nav-item.open .sub-menu {
+    display: flex;
+  }
+
+  @media (max-width: 768px) {
+    .sidebar {
+      left: -250px;
+      position: fixed;
+    }
+    .sidebar.open {
+      left: 0;
+    }
+  }
+
+  /* ==========================
+     PAGE LAYOUT
+     ========================== */
+  .topbar{position:fixed;left:250px;right:0;top:0;height:60px;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:1500;box-shadow:var(--shadow)}
+  .topbar .brandline{display:flex;align-items:center;gap:12px}
+  main{margin-left:250px;padding:100px 28px 40px}
+  .card{background:var(--panel);border-radius:var(--radius);padding:26px;border:1px solid var(--border);box-shadow:var(--shadow)}
+  .card__title{font-size:20px;color:var(--primary);font-weight:700;display:flex;align-items:center;gap:12px;border-bottom:2px solid rgba(15,114,180,0.06);padding-bottom:12px;margin-bottom:18px}
+  .controls{position:sticky !important;top:74px !important;z-index:1400 !important;background:transparent !important;padding-bottom:12px}
+  .controls-inner{display:flex;align-items:center;gap:12px;justify-content:space-between;margin-bottom:12px}
+  .left-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .right-controls{display:flex;gap:12px;align-items:center}
+  .filters input,.filters select{padding:8px 10px;border-radius:8px;border:1px solid var(--border);font-size:14px}
+  .btn{border:none;border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer}
+  .btn.primary{background:var(--primary);color:#fff}
+  .btn.ghost{background:#fff;border:1px solid var(--border);color:var(--muted)}
+  .btn.edit{background: #eef3ff; color: var(--primary); }
+  .summary{display:flex;gap:10px;align-items:center}
+  .chip{background:#f8fbff;padding:6px 10px;border-radius:999px;border:1px solid var(--border);font-weight:700;color:var(--primary)}
+  .table-wrap{overflow:auto;border-radius:10px;border:1px solid var(--border);background:#fff}
+  table{width:100%;border-collapse:collapse;min-width:900px}
+  th,td{padding:12px 14px;border-bottom:1px solid #f1f5f9;font-size:14px;text-align:left}
+  thead th{background:#f9fbfd;color:var(--primary);font-weight:700}
+  tr:hover td{background:#fbfdff}
+  .status-badge{padding:6px 10px;border-radius:999px;font-weight:700;font-size:13px}
+  .s-pending{background:#fff7ed;border:1px solid #ffe7c7;color:#b45309}
+  .s-approved{background:#eef2ff;border:1px solid #e0d7ff;color:var(--primary)}
+  .s-paid{background:#eef9f1;border:1px solid #c7f0d2;color:#16a34a}
+  .inline-msg{min-height:20px;color:#c0392b;font-size:13px;margin-top:8px}
+
+  .topbar {
+    height: 60px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 25px;
+    box-shadow: var(--shadow);
+    position: fixed;
+    top: 0;
+    left: 250px;
+    right: 0;
+    z-index: 1000;
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    color: var(--muted);
+  }
+
+  .menu-toggle {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--primary);
+    cursor: pointer;
+  }
+
+  /* ==========================
+     REVAMPED DRAWER (All-Bookings style)
+     ========================== */
+
+  .drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.25);
+    backdrop-filter: blur(3px);
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s ease;
+    z-index: 4000;
+  }
+  .drawer-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .drawer {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, 110%);
+    width: 600px;
+    max-width: 95%;
+    max-height: 85vh;
+    background: var(--panel);
+    border-radius: 20px;
+    box-shadow: 0 -6px 24px rgba(15, 23, 42, 0.18);
+    z-index: 5000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.35s cubic-bezier(0.22,1,0.36,1);
+  }
+  .drawer.active {
+    transform: translate(-50%, 0);
+  }
+
+  .drawer__head {
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .drawer__title {
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .drawer__title-main {
+    font-weight:700;
+    font-size:15px;
+    color:var(--primary);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .drawer__title-sub {
+    font-size:12px;
+    color:var(--muted);
+  }
+  .drawer__paid-pill {
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:4px 10px;
+    border-radius:999px;
+    background:#ecfdf3;
+    color:#166534;
+    font-size:11px;
+    font-weight:600;
+    border:1px solid #bbf7d0;
+  }
+
+  .drawer__body {
+    padding: 18px 22px 6px;
+    overflow-y:auto;
+    flex:1;
+  }
+
+  .drawer__meta {
+    font-size:12px;
+    color:var(--muted);
+    margin-bottom:14px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .drawer__meta span {
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  .meta-dot::before {
+    content:"•";
+    margin:0 4px;
+  }
+
+  .drawer__grid {
+    display:grid;
+    grid-template-columns:1.1fr 1.1fr;
+    gap:16px 18px;
+    margin-bottom:14px;
+  }
+
+  .group {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .group label {
+    font-size:12px;
+    font-weight:600;
+    color:var(--primary);
+  }
+  .group .field-pill {
+    padding:9px 11px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:#f9fafb;
+    font-size:13px;
+    color:var(--text);
+    min-height:36px;
+    display:flex;
+    align-items:center;
+  }
+
+  .amount-input {
+    display:flex;
+    align-items:center;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:#fdfdfd;
+    padding:0 10px;
+  }
+  .amount-input span.prefix {
+    font-size:13px;
+    font-weight:700;
+    color:var(--primary);
+    margin-right:4px;
+  }
+  .amount-input input {
+    border:none;
+    outline:none;
+    background:transparent;
+    padding:10px 0;
+    width:100%;
+    font-size:14px;
+  }
+
+  .drawer__section-title {
+    margin:16px 0 6px;
+    font-size:13px;
+    font-weight:700;
+    color:var(--text);
+    border-bottom:1px solid #edf1f6;
+    padding-bottom:5px;
+  }
+
+  .group select,
+  .group textarea {
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:#fdfdfd;
+    padding:9px 11px;
+    font-size:13px;
+    resize:vertical;
+  }
+
+  .drawer__footer {
+    border-top:1px solid var(--border);
+    padding:12px 18px;
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    background:var(--panel);
+  }
+  .drawer__footer .btn {
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+  }
+
+  .drawer__footer {
+  border-top: 1px solid var(--border);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--panel);
+}
+
+.drawer__msg-inline {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 600;
+  transition: color 0.25s ease, opacity 0.25s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 120px;
+}
+
+.drawer__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+
+  .btn-danger {
+    background:#fee2e2;
+    color:#b91c1c;
+    border:1px solid #fecaca;
+  }
+
+  #drawerMsg {
+    font-size:12px;
+    margin-bottom:10px;
+  }
+
+  @media (max-width:768px){
+    main{margin-left:0;padding:100px 16px}
+    .sidebar{left:-250px}
+    .sidebar.open{left:0}
+    .topbar{left:0;right:0}
+
+    .table-wrap{
+      overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+      border-radius:10px;
+      border:1px solid var(--border);
+      margin-top:8px;
+    }
+    table{min-width:720px}
+
+    .drawer {
+      width:100%;
+      max-width:100%;
+      left:0;
+      border-radius:20px 20px 0 0;
+      transform:translateY(110%);
+    }
+    .drawer.active {
+      transform:translateY(0);
+    }
+    .drawer__grid {
+      grid-template-columns:1fr;
+    }
+  }
+
+  /* ==========================
+   Drawer closing animation
+   ========================== */
+.drawer.closing {
+  transform: translate(-50%, 110%);
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.22,1,0.36,1), opacity 0.25s ease;
+}
+
+.drawer-overlay.closing {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+</style>
+</head>
+
+<body>
+
+  <!-- ==========================
+       SIDEBAR A (INSERTED)
+       ========================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <img src="https://raw.githubusercontent.com/Levinders/homeglitz/refs/heads/main/mainlogog-removebg-preview.png">
+    </div>
+
+    <ul class="nav-links">
+      <li><a href="/homeglitz/others/admin-404-page.html"><i class="fa-solid fa-chart-line"></i> Overview</a></li>
+
+      <li class="nav-item">
+        <a href="#" id="bookingMenu">
+          <i class="fa-solid fa-broom"></i> Bookings
+          <i class="fa-solid fa-chevron-down" style="margin-left:auto;"></i>
+        </a>
+        <div class="sub-menu">
+          <a href="booking.html">Create New</a>
+          <a href="all-bookings.html">All Bookings</a>
+        </div>
+      </li>
+
+      <li><a href="/homeglitz/admin/payments.html" class="active"><i class="fa-solid fa-wallet"></i> Payments</a></li>
+      <li><a href="/homeglitz/others/admin-404-page.html"><i class="fa-solid fa-house-user"></i> Properties</a></li>
+      <li><a href="/homeglitz/admin/cleaners.html"><i class="fa-solid fa-users"></i> Cleaners</a></li>
+      <li><a href="/homeglitz/others/admin-404-page.html"><i class="fa-solid fa-chart-pie"></i> Reports</a></li>
+      <li><a href="/homeglitz/others/admin-404-page.html"><i class="fa-solid fa-gear"></i> Settings</a></li>
+    </ul>
+  </aside>
+
+ <div class="overlay" id="overlay"></div>
+
+  <div style="flex:1; display:flex; flex-direction:column;">
+
+<header class="topbar">
+  <button class="menu-toggle" id="menuToggle">
+    <i class="fa-solid fa-bars"></i>
+  </button>
+
+  <div class="topbar-right">
+    <i class="fa-regular fa-bell"></i>
+
+    <div class="user-menu">
+      <i class="fa-regular fa-user" id="userIcon"></i>
+
+      <div class="logout-dropdown" id="logoutDropdown">
+        <button id="logoutBtn">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+  <!-- ========== main content ========== -->
+  <main>
+    <div class="card">
+      <div class="card__title"><i class="fa-solid fa-wallet"></i> Payment Requests</div>
+
+      <!-- fixed controls -->
+      <div class="controls">
+        <div class="controls-inner">
+          <div class="left-controls">
+            <div style="display:flex;align-items:center;gap:14px">
+              <div class="summary">
+                <div class="chip" id="totalPending">Pending: 0</div>
+                <div class="chip" id="totalApproved">Approved: 0</div>
+                <div class="chip" id="totalPaid">Paid: 0</div>
+              </div>
+            </div>
+
+            <div class="filters" style="margin-left:12px;display:flex;gap:8px;align-items:center">
+              <input id="search" placeholder="Search request, booking, cleaner..." />
+              <select id="filterStatus">
+                <option value="all">All statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="right-controls">
+            <button class="btn ghost" id="btnRefresh" style="color:#FFFFFF;background:#0F72B4;"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap" id="tableWrap">
+        <table id="requestsTable" aria-live="polite">
+          <thead>
+            <tr>
+              <th>Request</th>
+              <th>Property</th>
+              <th>Cleaner</th>
+              <th>Amount</th>
+              <th>Requested At</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:36px">Loading…</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="inline-msg" id="pageMsg"></div>
+    </div>
+  </main>
+
+  <!-- Drawer overlay + revamped drawer -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+
+  <div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="drawer__head">
+      <div class="drawer__title">
+        <div class="drawer__title-main">
+          <i class="fa-solid fa-file-invoice-dollar"></i>
+          <span>Payment Request <span id="dwRequestId"></span></span>
+        </div>
+        <div class="drawer__title-sub" id="dwMeta"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span id="dwPaidPill" class="drawer__paid-pill" style="display:none;">
+          <i class="fa-solid fa-circle-check"></i> Paid
+        </span>
+        <button class="btn ghost" id="btnClose" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="drawer__body">
+      <div class="drawer__grid">
+        <div class="group">
+          <label>Booking</label>
+          <div class="field-pill" id="dwBookingId"></div>
+        </div>
+        <div class="group">
+          <label>Cleaner</label>
+          <div class="field-pill" id="dwCleaner"></div>
+        </div>
+        <div class="group">
+          <label>Property</label>
+          <div class="field-pill" id="dwProperty"></div>
+        </div>
+        
+<div class="group">
+  <label>Current Status</label>
+  <select id="dwStatus">
+    <option value="Pending">Pending</option>
+    <option value="Approved">Approved</option>
+    <option value="Cancelled">Cancelled</option>
+    <option value="Paid">Paid</option>
+  </select>
+</div>
+
+
+        
+      </div>
+
+      <div class="drawer__section-title">Payment Details</div>
+      <div class="drawer__grid">
+        <div class="group">
+          <label>Amount (Ex GST)</label>
+          <div class="amount-input">
+            <span class="prefix">$</span>
+            <input id="dwAmount" type="number" min="0" step="0.01" />
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer__section-title">Admin Note</div>
+      <div class="group">
+        <label for="dwAdminNote">Internal note (optional)</label>
+        <textarea id="dwAdminNote" rows="3" placeholder="Add any note related to this approval or payment..."></textarea>
+      </div>
+    </div>
+
+<div class="drawer__footer">
+  <div id="drawerMsg" class="drawer__msg-inline"></div>
+
+  <div class="drawer__actions">
+    <button class="btn ghost" id="btnApproveOnly">
+      <i class="fa-solid fa-check"></i>
+      Saved
+    </button>
+    <button class="btn primary" id="btnApprove">
+      <i class="fa-solid fa-dollar-sign"></i>
+      Paid + Invoice
+    </button>
+  </div>
+</div>
+
+
+    
+  </div>
+  </div>
+
+  <!-- ==========================
+       SIDEBAR + PAGE JS
+       ========================== -->
+  <script>
+    // ========= Admin Gate =========
+if (localStorage.getItem("homeglitzAdminAuth") !== "true") {
+  window.location.href = "login.html";
+}
+
+    // Toggle logout dropdown
+const userIcon = document.getElementById("userIcon");
+const logoutDropdown = document.getElementById("logoutDropdown");
+
+userIcon.addEventListener("click", () => {
+  logoutDropdown.classList.toggle("active");
+});
+
+// Close dropdown when clicking outside
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".user-menu")) {
+    logoutDropdown.classList.remove("active");
+  }
+});
+
+// Perform Logout
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  // Smooth fade-out
+  document.body.style.transition = "opacity 0.4s ease";
+  document.body.style.opacity = "0";
+
+  setTimeout(() => {
+    localStorage.removeItem("homeglitzAdminAuth");
+    window.location.href = "login.html";
+  }, 400);
+});
+
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay'); // sidebar overlay
+    const menuToggle = document.getElementById('menuToggle');
+    const bookingMenu = document.getElementById('bookingMenu');
+    const bookingItem = bookingMenu?.parentElement;
+
+    // submenu toggle
+    if (bookingMenu) {
+      bookingMenu.onclick = (e) => {
+        e.preventDefault();
+        bookingItem.classList.toggle('open');
+      };
+    }
+
+    // mobile toggle support
+    if (menuToggle) {
+      menuToggle.onclick = () => {
+        sidebar.classList.toggle('open');
+        overlay?.classList.toggle('active');
+      };
+    }
+    if (overlay) {
+      overlay.onclick = () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+      };
+    }
+
+    
+/*
+  Admin Payments page JS
+  Uses your Cloudflare Worker proxy to avoid CORS.
+  Worker URL (your proxy): https://homeglitz.raphaellevinders.workers.dev/
+*/
+const PROXY = "https://homeglitz.raphaellevinders.workers.dev/";
+const pageMsg = document.getElementById('pageMsg');
+const drawerMsg = document.getElementById('drawerMsg');
+
+let ALL = []; // all requests
+let CURRENT = null; // current request object
+
+/* DOM refs */
+const tbody = document.querySelector('#requestsTable tbody');
+const searchEl = document.getElementById('search');
+const filterStatus = document.getElementById('filterStatus');
+const totalPending = document.getElementById('totalPending');
+const totalApproved = document.getElementById('totalApproved');
+const totalPaid = document.getElementById('totalPaid');
+
+const drawer = document.getElementById('drawer');
+const drawerOverlay = document.getElementById('drawerOverlay');
+const btnClose = document.getElementById('btnClose');
+const dwRequestId = document.getElementById('dwRequestId');
+const dwMeta = document.getElementById('dwMeta');
+const dwBookingId = document.getElementById('dwBookingId');
+const dwProperty = document.getElementById('dwProperty');
+const dwCleaner = document.getElementById('dwCleaner');
+const dwAmount = document.getElementById('dwAmount');
+const dwStatus = document.getElementById('dwStatus');
+const dwAdminNote = document.getElementById('dwAdminNote');
+const dwPaidPill = document.getElementById('dwPaidPill');
+
+document.getElementById('btnRefresh').addEventListener('click', loadRequests);
+btnClose.addEventListener('click', closeDrawer);
+drawerOverlay.addEventListener('click', closeDrawer);
+document.getElementById('btnApprove').addEventListener('click', () => approveFlow('paid'));
+document.getElementById('btnApproveOnly').addEventListener('click', () => approveFlow('approve'));
+
+searchEl.addEventListener('input', applyFilters);
+filterStatus.addEventListener('change', applyFilters);
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeDrawer();
+  }
+});
+
+  
+async function approveRequest(requestId, approvedAmount) {
+  const res = await fetch(PROXY, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      action: 'adminApprovePayment',
+      requestId,
+      approvedAmount,
+      approver: 'Admin'
+    })
+  });
+
+  const json = await res.json();
+  if (json && json.success) {
+    if (json.pdfUrl) {
+      const btn = document.getElementById('btnViewInvoice');
+      if (btn) {
+        btn.style.display = 'inline-block';
+        btn.onclick = () => window.open(json.pdfUrl, '_blank');
+      }
+    }
+  } else {
+    console.error(json);
+    alert('Approve failed: ' + (json && json.message));
+  }
+}
+
+
+/* load list from backend */
+async function loadRequests() {
+  pageMsg.textContent = '';
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:28px">Loading…</td></tr>';
+  try {
+    const res = await fetch(PROXY, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ action: 'getAllPaymentRequests' })
+    });
+    const json = await res.json();
+    if (!json || !json.success) {
+      pageMsg.textContent = (json && json.message) ? json.message : 'Failed to load requests';
+      ALL = [];
+      renderTable([]);
+      return;
+    }
+    ALL = json.data || [];
+    updateSummary(ALL);
+    renderTable(ALL);
+  } catch (err) {
+    console.error(err);
+    pageMsg.textContent = 'Network error — check deployment';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:28px">Unable to load</td></tr>';
+  }
+}
+
+/* update counts */
+function updateSummary(list) {
+  const pending = list.filter(r => (r.Status||'').toString() === 'Pending').length;
+  const approved = list.filter(r => (r.Status||'').toString() === 'Approved').length;
+  const paid = list.filter(r => (r.Status||'').toString() === 'Paid').length;
+  totalPending.textContent = 'Pending: ' + pending;
+  totalApproved.textContent = 'Approved: ' + approved;
+  totalPaid.textContent = 'Paid: ' + paid;
+}
+
+/* render table rows */
+    function renderTable(rows) {
+  if (!rows || rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:28px">No payment requests</td></tr>';
+    return;
+  }
+      
+  const html = rows.map(r => {
+    const req = escapeHtml(r['Request ID'] || r['RequestId'] || '');
+    const bookingId = r['Booking ID'] || r['BookingId'] || '';
+
+    let property = r['Property Name'] || r['Property'] || '';
+    let cleaner = r['Cleaner Name'] || r['Cleaner'] || '';
+
+    // ✅ Lookup missing names from BOOKINGS_CACHE
+    if ((!property || !cleaner) && BOOKINGS_CACHE) {
+      let data = BOOKINGS_CACHE;
+      if (data && data.data && Array.isArray(data.data)) data = data.data;
+
+      const found = Array.isArray(data)
+        ? data.find(b => String(b['Booking ID']).trim() === String(bookingId).trim())
+        : null;
+
+      if (found) {
+        if (!property) property = found['Property Name'] || found['Property'] || '';
+        if (!cleaner) cleaner = found['Cleaner Name'] || found['Cleaners'] || '';
+      }
+    }
+
+    property = escapeHtml(property || '—');
+    cleaner = escapeHtml(cleaner || '—');
+
+    const amount = Number(r['Amount'] || r['Approved Amount'] || 0).toFixed(2);
+    const when = r['Requested At'] ? formatDate(r['Requested At']) : (r['RequestedAt'] || '');
+    const statusRaw = (r['Status']||'').toString();
+    const status = statusRaw || 'Pending';
+    const statusClass = status === 'Pending'
+      ? 's-pending'
+      : status === 'Approved'
+      ? 's-approved'
+      : status === 'Paid'
+      ? 's-paid'
+      : 's-approved';
+
+    return `<tr data-req="${req}">
+      <td>${req}</td>
+      <td>${property || '—'}</td>
+      <td>${cleaner || '—'}</td>
+      <td>$${amount}</td>
+      <td>${when}</td>
+      <td><span class="status-badge ${statusClass}">${status}</span></td>
+      <td><button class="btn edit" onclick="openDrawer('${req}')"><i class="fa fa-edit"></i></button></td>
+    </tr>`;
+  }).join('');
+  tbody.innerHTML = html;
+}
+
+
+/* filtering */
+function applyFilters() {
+  const q = (searchEl.value || '').toLowerCase().trim();
+  const s = filterStatus.value;
+  const filtered = ALL.filter(r => {
+    const status = (r['Status']||'').toString();
+    if (s !== 'all' && status !== s) return false;
+    const hay = ((r['Request ID']||'') + ' ' + (r['Booking ID']||'') + ' ' + (r['Cleaner ID']||'') + ' ' + (r['Property']||'') + ' ' + (r['Cleaner Name']||'') + ' ' + (r['Requested At']||'')).toLowerCase();
+    if (q && !hay.includes(q)) return false;
+    return true;
+  });
+  renderTable(filtered);
+}
+
+/* open drawer */
+let BOOKINGS_CACHE = null;
+window.openDrawer = async function(requestId) {
+  drawerMsg.textContent = '';
+  const row = ALL.find(r => (r['Request ID']||r['RequestId']||'') === requestId);
+  if (!row) {
+    drawerMsg.textContent = 'Request not found';
+    return;
+  }
+  CURRENT = row;
+
+  const bookingId = row['Booking ID'] || row['BookingId'] || '';
+  const cleanerId = row['Cleaner ID'] || row['CleanerId'] || '';
+
+  let cleanerName = row['Cleaner Name'] || '';
+  let propertyName = row['Property'] || row['Property Name'] || '';
+
+  // ✅ Lookup from "All Bookings Sync" for more accurate names
+  if (bookingId) {
+    try {
+      const res = await fetch(PROXY, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'getAllPaymentRequests' }) // temp dummy to reuse proxy; will call correct endpoint next
+      });
+      // Instead of above, use the direct GET for "bookings"
+
+      
+if (!BOOKINGS_CACHE) {
+  const bookingsRes = await fetch(`${PROXY}?type=bookings`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' }
+  });
+
+  console.log("🔍 BOOKINGS API RESPONSE →", await bookingsRes.clone().text());
+
+  BOOKINGS_CACHE = await bookingsRes.json();
+}
+
+let bookingsJson = BOOKINGS_CACHE;
+
+// Some backends wrap data inside { success, data }
+if (bookingsJson && bookingsJson.data && Array.isArray(bookingsJson.data)) {
+  bookingsJson = bookingsJson.data;
+}
+
+// Unwrap backend data structure if needed
+let bookingsData = bookingsJson;
+if (bookingsJson && bookingsJson.data && Array.isArray(bookingsJson.data)) {
+  bookingsData = bookingsJson.data;
+}
+
+if (Array.isArray(bookingsData)) {
+  const found = bookingsData.find(
+    b => String(b['Booking ID']).trim() === String(bookingId).trim()
+  );
+  if (found) {
+    if (!propertyName)
+      propertyName = found['Property Name'] || found['Property'] || '';
+    if (!cleanerName)
+      cleanerName = found['Cleaner Name'] || found['Cleaners'] || '';
+  }
+}
+
+     
+    } catch (err) {
+      console.warn('Booking info lookup failed', err);
+    }
+  }
+
+  dwRequestId.textContent = requestId;
+  dwBookingId.textContent = bookingId || '—';
+  dwCleaner.textContent = cleanerName || cleanerId || '—';
+  dwProperty.textContent = propertyName || '—';
+
+  
+  const requested = row['Requested At'] || row['RequestedAt'] || '';
+  const statusRaw = (row['Status'] || '').toString() || 'Pending';
+
+  dwRequestId.textContent = requestId;
+  dwBookingId.textContent = bookingId || '—';
+  dwCleaner.textContent = cleanerName || '—';
+  dwProperty.textContent = propertyName || '—';
+
+  const parts = [];
+  if (requested) parts.push(`<i class="fa-regular fa-clock"></i> ${formatDate(requested)}`);
+  if (cleanerName) parts.push(`<span class="meta-dot"></span><i class="fa-solid fa-user"></i> ${escapeHtml(cleanerName)}`);
+  if (propertyName) parts.push(`<span class="meta-dot"></span><i class="fa-solid fa-house"></i> ${escapeHtml(propertyName)}`);
+  dwMeta.innerHTML = parts.join(' ');
+
+  dwAmount.value = (row['Amount'] || row['Approved Amount'] || 0);
+  dwStatus.value = statusRaw === 'Paid' ? 'Paid' : (['Pending','Approved','Cancelled'].includes(statusRaw) ? statusRaw : 'Pending');
+  dwAdminNote.value = row['Admin Note'] || '';
+
+  const isPaid = statusRaw === 'Paid';
+  setPaidMode(isPaid);
+
+  drawer.classList.add('active');
+  drawerOverlay.classList.add('active');
+  drawer.setAttribute('aria-hidden', 'false');
+};
+
+/* helper: lock/unlock UI when Paid */
+function setPaidMode(isPaid) {
+  if (isPaid) {
+    dwPaidPill.style.display = 'inline-flex';
+    dwAmount.disabled = true;
+    dwAdminNote.disabled = true;
+    // dwStatus is already read-only (disabled)
+    document.getElementById('btnApprove').style.display = 'none';
+    document.getElementById('btnApproveOnly').style.display = 'none';
+    drawerMsg.style.color = '#16a34a';
+    drawerMsg.textContent = 'This request has been marked as Paid. Details are read-only.';
+  } else {
+    dwPaidPill.style.display = 'none';
+    dwAmount.disabled = false;
+    dwAdminNote.disabled = false;
+    document.getElementById('btnApprove').style.display = 'inline-flex';
+    document.getElementById('btnApproveOnly').style.display = 'inline-flex';
+    drawerMsg.textContent = '';
+  }
+}
+
+/* close drawer */
+function closeDrawer(animated = true) {
+  if (animated) {
+    // Add 'closing' class for smooth exit
+    drawer.classList.add('closing');
+    drawerOverlay.classList.add('closing');
+
+    // Remove after animation completes
+    setTimeout(() => {
+      drawer.classList.remove('active', 'closing');
+      drawerOverlay.classList.remove('active', 'closing');
+      drawer.setAttribute('aria-hidden', 'true');
+      CURRENT = null;
+      drawerMsg.textContent = '';
+    }, 350);
+  } else {
+    // Immediate close (no animation)
+    drawer.classList.remove('active');
+    drawerOverlay.classList.remove('active');
+    drawer.setAttribute('aria-hidden', 'true');
+    CURRENT = null;
+    drawerMsg.textContent = '';
+  }
+}
+
+
+/* approveFlow: mode = 'paid' or 'approve' */
+async function approveFlow(mode) {
+  drawerMsg.style.color = '#c0392b';
+  drawerMsg.textContent = '';
+  if (!CURRENT) return;
+
+  const requestId = dwRequestId.textContent;
+  const approvedAmount = Number(dwAmount.value || 0);
+  const adminNote = dwAdminNote.value || '';
+  const approver = 'Admin';
+
+  if (!requestId) {
+    drawerMsg.textContent = 'Missing request id';
+    return;
+  }
+  if (isNaN(approvedAmount) || approvedAmount <= 0) {
+    drawerMsg.textContent = 'Enter valid amount';
+    return;
+  }
+
+const newStatus = document.getElementById('dwStatus').value.trim() || 'Pending';
+
+const payload = {
+  action: 'adminApprovePayment',
+  requestId,
+  approvedAmount,
+  adminNote,
+  approver,
+  status: mode === 'paid' ? 'Paid' : newStatus   // ✅ forces “Paid” for the Paid + Invoice button
+};
+
+
+
+
+
+  drawerMsg.style.color = '#6c757d';
+  drawerMsg.textContent = 'Saving…';
+
+  try {
+    const res = await fetch(PROXY, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+
+    if (!json || !json.success) {
+      drawerMsg.style.color = '#c0392b';
+      drawerMsg.textContent = (json && json.message) ? json.message : 'Update failed';
+      return;
+    }
+
+    // ✅ Update local CURRENT + ALL immediately (UI sync)
+    CURRENT['Amount'] = approvedAmount;
+    CURRENT['Approved Amount'] = approvedAmount;
+    CURRENT['Admin Note'] = adminNote;
+    CURRENT['Status'] = newStatus;
+
+    // ✅ Update table without full reload
+    const row = document.querySelector(`tr[data-req="${requestId}"] td:nth-child(4)`);
+    if (row) row.textContent = `$${approvedAmount.toFixed(2)}`;
+
+    // ✅ Update status badge live
+const statusBadge = document.querySelector(`tr[data-req="${requestId}"] td:nth-child(6) .status-badge`);
+if (statusBadge) {
+  const cls =
+    newStatus === 'Paid'
+      ? 's-paid'
+      : newStatus === 'Approved'
+      ? 's-approved'
+      : newStatus === 'Pending'
+      ? 's-pending'
+      : 's-approved'; // fallback for Cancelled or others
+  statusBadge.className = `status-badge ${cls}`;
+  statusBadge.textContent = newStatus;
+  dwStatus.value = newStatus;
+
+}
+
+
+    // ✅ Feedback + smooth refresh
+    drawerMsg.style.color = '#16a34a';
+    drawerMsg.textContent = 'Updated successfully';
+setTimeout(() => {
+  closeDrawer(true);
+  loadRequests();   // ensures updated status + PDF URL show instantly
+}, 600);
+  } catch (err) {
+    console.error(err);
+    drawerMsg.style.color = '#c0392b';
+    drawerMsg.textContent = 'Network error — check deployment';
+  }
+}
+
+
+    
+/* helpers */
+function formatDate(v) {
+  try {
+    if (!v) return '';
+    const d = new Date(v);
+    if (isNaN(d)) return v;
+    return d.toLocaleString();
+  } catch (e) { return String(v); }
+}
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+
+    window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res = await fetch(`${PROXY}?type=bookings`);
+    BOOKINGS_CACHE = await res.json();
+  } catch (err) {
+    console.warn('Preload All Bookings failed', err);
+  }
+  await loadRequests(); // ⬅ move this *after* preload
+});
+
+
+    
+  </script>
+</body>
+</html>
