@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HomeGlitz — All Bookings</title>
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Levinders/homeglitz/refs/heads/main/64%C3%9764pxlogo.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+:root {
+  --primary: #0F72B4;
+  --primary-light: #f5faff;
+  --text: #222;
+  --muted: #6c757d;
+  --panel: #fff;
+  --border: #e4e9ef;
+  --radius: 12px;
+  --shadow: 0 6px 20px rgba(15,114,180,0.1);
+  --transition: 0.3s ease;
+}
+
+* { box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+html, body { margin: 0; padding: 0; overflow-x: hidden; }
+body { display: flex; min-height: 100vh; background: var(--primary-light); color: var(--text); }
+
+    /* ---- USER MENU + LOGOUT DROPDOWN ---- */
+.user-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+#userIcon {
+  cursor: pointer;
+  font-size: 18px;
+  transition: 0.2s ease;
+}
+
+#userIcon:hover {
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+/* Dropdown styling */
+.logout-dropdown {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  border-radius: 10px;
+  padding: 8px 0;
+  width: 160px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: 0.25s ease;
+  z-index: 2000;
+}
+
+.logout-dropdown.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Logout button */
+#logoutBtn {
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+#logoutBtn i {
+  color: var(--primary);
+}
+
+#logoutBtn:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+/* Align icons horizontally */
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.topbar-right i {
+  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* === SIDEBAR === */
+.sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0;
+  width: 250px; background: var(--panel); border-right: 1px solid var(--border);
+  box-shadow: var(--shadow); display: flex; flex-direction: column;
+  padding: 20px 0; overflow-y: auto; z-index: 2000;
+}
+.sidebar .brand { display: flex; align-items: center; justify-content: center; margin-bottom: 30px; }
+.sidebar .brand img { height: 48px; transition: all var(--transition); }
+.nav-links { list-style: none; padding: 0; margin: 0; }
+.nav-item { position: relative; }
+.nav-links li a {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 22px; color: var(--muted); font-weight: 500;
+  text-decoration: none; transition: all var(--transition);
+}
+.nav-links li a:hover, .nav-links li a.active {
+  background: var(--primary-light); color: var(--primary);
+  border-left: 4px solid var(--primary);
+}
+.sub-menu { display: none; flex-direction: column; margin-left: 40px; }
+.sub-menu a { font-size: 14px; color: var(--muted); padding: 8px 0; transition: 0.2s; }
+.sub-menu a:hover { color: var(--primary); }
+.nav-item.open .sub-menu { display: flex; }
+
+/* === TOPBAR === */
+.topbar {
+  height: 60px; background: var(--panel); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 25px; box-shadow: var(--shadow);
+  position: fixed; top: 0; left: 250px; right: 0; z-index: 1000;
+}
+.menu-toggle { background: none; border: none; font-size: 20px; color: var(--primary); cursor: pointer; }
+.topbar-right { display: flex; align-items: center; gap: 20px; color: var(--muted); }
+
+/* === MAIN === */
+main { flex: 1; margin-left: 250px; padding: 100px 40px 40px; background: var(--primary-light); }
+
+/* === Pagination Footer Fix === */
+.card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 20px;
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+}
+
+.page-indicator {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pagination {
+  display: flex;
+  gap: 10px;
+}
+
+.pagination .btn {
+  background: var(--primary-light);
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.pagination .btn:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.pagination .btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.card {
+  background: var(--panel); border-radius: var(--radius); box-shadow: var(--shadow);
+  border: 1px solid var(--border); padding: 0; overflow: hidden;
+  display: flex; flex-direction: column; height: calc(100vh - 120px);
+}
+
+.card__header { background: var(--panel); border-bottom: 1px solid var(--border); z-index: 5; padding: 16px 20px; }
+h2.card__title { font-size: 22px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px; margin: 0 0 12px 0; }
+
+/* === Filters === */
+.filters { display: grid; grid-template-columns: 0.2fr 0.2fr 0.2fr 0.2fr auto; gap: 10px; align-items: center; }
+.filters .field {
+  display: flex; align-items: center; gap: 8px; border: 1px solid var(--border);
+  border-radius: 10px; padding: 8px 12px; background: #fdfdfd;
+}
+.filters .field input, .filters .field select { border: none; outline: none; background: transparent; font-size: 14px; flex: 1; }
+.filters .btn-clear {
+  border: none; border-radius: 10px; padding: 10px 16px;
+  background: #f1f3f5; color: var(--muted); font-weight: 600; cursor: pointer;
+  transition: var(--transition);
+}
+.filters .btn-clear:hover { background: #e9ecef; }
+
+/* === Table === */
+.table-wrap { flex: 1 1 auto; overflow: auto; border-top: 1px solid var(--border); background: #fff; }
+table { width: 100%; border-collapse: collapse; min-width: 500px; }
+thead th { position: sticky; top: 0; background: var(--primary); color: #fff; z-index: 2; font-size: 14px; white-space: nowrap; }
+th, td { padding: 12px 12px; font-size: 13px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tbody tr:hover { background: var(--primary-light); cursor: pointer; }
+td.cell-actions { cursor: default; }
+.prop-trunc { max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; }
+select.status-select {
+  border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px;
+  font-size: 13px; background: #f9fbfd; color: var(--text); cursor: pointer;
+}
+
+/* ============================
+   NEW — Floating Drawer (Cleaners Style)
+   ============================ */
+
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  visibility: hidden;
+  transition: var(--transition);
+  z-index: 4000;
+}
+.drawer-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.drawer {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 120%);
+  width: 600px;
+  max-width: 95%;
+  max-height: 85vh;
+  background: var(--panel);
+  border-radius: 20px;
+  box-shadow: 0 -6px 20px rgba(0,0,0,0.1);
+  z-index: 5000;
+  transition: transform 0.35s cubic-bezier(0.22,1,0.36,1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.drawer.active {
+  transform: translate(-50%, 0);
+}
+
+.drawer__head {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.drawer__body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.drawer__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 24px;
+}
+
+.group { display: flex; flex-direction: column; gap: 6px; }
+.group label {
+  font-weight: 600;
+  color: var(--primary);
+  font-size: 14px;
+}
+.group input,
+.group select,
+.group textarea {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  background: #fdfdfd;
+}
+
+.section-title {
+  margin: 20px 0 6px;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+  border-bottom: 1px solid #edf1f6;
+  padding-bottom: 6px;
+}
+
+.drawer__footer {
+  border-top: 1px solid var(--border);
+  padding: 16px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background: var(--panel);
+}
+
+/* Packing list stays same */
+#dwLinenGrid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 12px;
+}
+#dwLinenGrid .group {
+  background: #f9fafb; border: 1px solid #e8ecf0; border-radius: 10px;
+  padding: 8px 10px; text-align: center;
+}
+
+/* === Mobile Enhancements === */
+@media (max-width: 768px) {
+  main { margin-left: 0; padding: 100px 12px; }
+  .sidebar { left: -250px; }
+  .sidebar.open { left: 0; }
+  .topbar { left: 0; right: 0; }
+
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  table { min-width: 720px; }
+
+  /* Drawer fullscreen mobile */
+  .drawer {
+    width: 100%;
+    max-width: 100%;
+    left: 0;
+    height: 100vh;
+    border-radius: 20px 20px 0 0;
+    transform: translateY(110%);
+  }
+  .drawer.active {
+    transform: translateY(0);
+  }
+
+  .drawer__grid {
+    grid-template-columns: 1fr;
+  }
+
+  #dwLinenGrid .group {
+    padding: 8px 10px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #eaeaea;
+  }
+}
+</style>
+
+</head>
+<body>
+
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <img src="https://raw.githubusercontent.com/Levinders/homeglitz/refs/heads/main/mainlogog-removebg-preview.png" alt="HomeGlitz Logo">
+    </div>
+    <ul class="nav-links">
+      <li><a href="/homeglitz/others/admin-404-page.html"><i class="fa-solid fa-chart-line"></i><span> Overview</span></a></li>
+      <li class="nav-item open">
+        <a href="#" id="bookingMenu"><i class="fa-solid fa-broom"></i><span> Bookings</span><i class="fa-solid fa-chevron-down" style="margin-left:auto;"></i></a>
+        <div class="sub-menu" style="display:flex;">
+          <a href="booking.html">Create New</a>
+          <a href="all-bookings.html" class="active">All Bookings</a>
+        </div>
+      </li>
+      <li><a href="/homeglitz/admin/payments.html"><i class="fa-solid fa-wallet"></i><span> Payments</span></a></li>
+      <li><a href="others/admin-404-page.html"><i class="fa-solid fa-house"></i><span> Properties</span></a></li>
+      <li><a href="cleaners.html"><i class="fa-solid fa-users"></i><span> Cleaners</span></a></li>
+      <li><a href="others/admin-404-page.html"><i class="fa-solid fa-chart-pie"></i><span> Reports</span></a></li>
+      <li><a href="others/admin-404-page.html"><i class="fa-solid fa-gear"></i><span> Settings</span></a></li>
+    </ul>
+  </aside>
+
+<div class="overlay" id="overlay"></div>
+
+  <div style="flex:1; display:flex; flex-direction:column;">
+
+<header class="topbar">
+  <button class="menu-toggle" id="menuToggle">
+    <i class="fa-solid fa-bars"></i>
+  </button>
+
+  <div class="topbar-right">
+    <i class="fa-regular fa-bell"></i>
+
+    <div class="user-menu">
+      <i class="fa-regular fa-user" id="userIcon"></i>
+
+      <div class="logout-dropdown" id="logoutDropdown">
+        <button id="logoutBtn">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+      </div>
+    </div>
+  </div>
+
+    </header>
+
+    <main>
+      <div class="card">
+        <!-- Header (title + inline filters) -->
+        <div class="card__header">
+          <h2 class="card__title"><i class="fa-solid fa-calendar"></i> All Bookings</h2>
+          <div class="filters" id="filtersBar">
+            <div class="field" title="Search">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input id="fSearch" type="text" placeholder="Search cleaner, property…"/>
+            </div>
+            <div class="field" title="Type">
+              <i class="fa-solid fa-layer-group"></i>
+              <select id="fType">
+                <option value="all">All Types</option>
+                <option value="airbnb">Airbnb Cleaning</option>
+                <option value="office">Home / Office Cleaning</option>
+              </select>
+            </div>
+            <div class="field" title="Status">
+              <i class="fa-solid fa-flag"></i>
+              <select id="fStatus">
+                <option value="all">All Status</option>
+                <option value="Pending">Pending</option>
+                <option value="Clean Underway">Clean Underway</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+            <div class="field" title="Date">
+              <i class="fa-regular fa-calendar"></i>
+              <input id="fDate" type="date"/>
+            </div>
+            <button class="btn-clear" id="fClear" title="Clear filters"><i class="fa-solid fa-rotate-left"></i></button>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrap">
+          <table id="bookingsTable">
+            <thead>
+              <tr>
+                <th>Booking ID</th>
+                <th>Status</th>
+                <th>Property Name</th>
+                <th>Cleaner</th>                
+                <th>Cleaning Date</th>
+                <th>B2B</th>
+                <th>Type</th>                
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;">Loading bookings...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Fixed footer with pagination -->
+        <div class="card__footer">
+          <div class="page-indicator" id="pageIndicator">Page 1 of 1</div>
+          <div class="pagination">
+            <button class="btn" id="btnPrev"><i class="fa-solid fa-angle-left"></i> Prev</button>
+            <button class="btn" id="btnNext">Next <i class="fa-solid fa-angle-right"></i></button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<!-- Revamped Drawer -->
+<div class="drawer-overlay" id="drawerOverlay"></div>
+
+<div class="drawer" id="drawer">
+
+  <!-- Header -->
+  <div class="drawer__head">
+    <span id="dwTitle"><i class="fa-solid fa-clipboard-list"></i> Booking Details</span>
+    <i class="fa-solid fa-xmark" style="cursor:pointer;" id="dwClose"></i>
+  </div>
+
+  <!-- Body -->
+  <div class="drawer__body">
+
+    <!-- Property Section -->
+    <div class="section-title"><i class="fa-solid fa-house"></i> Property</div>
+    <div class="drawer__grid">
+      <div class="group"><label>Booking ID</label><input id="dwId" disabled></div>
+      <div class="group"><label>Type</label><input id="dwType" disabled></div>
+      <div class="group"><label>Property Name</label><input id="dwProp" disabled></div>
+      <div class="group"><label>Address</label><input id="dwAddr" disabled></div>
+    </div>
+
+    <!-- Cleaning Section -->
+    <div class="section-title"><i class="fa-solid fa-broom"></i> Cleaning</div>
+    <div class="drawer__grid">
+      <div class="group"><label>Cleaner</label><input id="dwCleaner"></div>
+      <div class="group"><label>Cleaning Date</label><input id="dwDate" type="date"></div>
+      <div class="group">
+        <label>Status</label>
+        <select id="dwStatus">
+          <option>Pending</option>
+          <option>Clean Underway</option>
+          <option>Completed</option>
+        </select>
+      </div>
+
+      <div class="group">
+        <label>B2B</label>
+        <div style="display:flex;gap:8px;">
+          <div id="dwB2BYes" class="badge">Yes</div>
+          <div id="dwB2BNo" class="badge active">No</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="group" style="margin-top:10px;">
+      <label>Notes</label>
+      <textarea id="dwNotes" rows="3"></textarea>
+    </div>
+
+    <!-- Airbnb Packing List -->
+    <div id="dwAirbnbSection" style="display:none;">
+      <div class="section-title">
+        <i class="fa-solid fa-bed"></i> Packing List (Airbnb)
+        <span id="dwTotal" style="float:right;color:var(--primary);font-weight:600;">Total: 0</span>
+      </div>
+      <div id="dwLinenGrid"></div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="drawer__footer">
+    <button class="btn btn-light" id="dwCancel">Cancel</button>
+    <button class="btn btn-primary" id="dwSave"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+  </div>
+</div>
+
+
+    
+  </aside>
+
+  <!-- Toast + Loader -->
+  <div class="hz-toast" id="toast"></div>
+  <div class="hz-loader" id="loader"><div class="box"><div class="spin"></div><span>Loading…</span></div></div>
+
+
+  <script>
+    // ========= Admin Gate =========
+if (localStorage.getItem("homeglitzAdminAuth") !== "true") {
+  window.location.href = "login.html";
+}
+
+    // Toggle logout dropdown
+const userIcon = document.getElementById("userIcon");
+const logoutDropdown = document.getElementById("logoutDropdown");
+
+userIcon.addEventListener("click", () => {
+  logoutDropdown.classList.toggle("active");
+});
+
+// Close dropdown when clicking outside
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".user-menu")) {
+    logoutDropdown.classList.remove("active");
+  }
+});
+
+// Perform Logout
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  // Smooth fade-out
+  document.body.style.transition = "opacity 0.4s ease";
+  document.body.style.opacity = "0";
+
+  setTimeout(() => {
+    localStorage.removeItem("homeglitzAdminAuth");
+    window.location.href = "login.html";
+  }, 400);
+});
+
+
+    /* ===== Sidebar / Topbar (exact behavior) ===== */
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const menuToggle = document.getElementById('menuToggle');
+    const bookingMenu = document.getElementById('bookingMenu');
+    const bookingItem = bookingMenu.parentElement;
+
+    menuToggle.onclick = () => { sidebar.classList.toggle('open'); overlay.classList.toggle('active'); };
+    overlay.onclick = () => { sidebar.classList.remove('open'); overlay.classList.remove('active'); };
+    bookingMenu.onclick = (e) => { e.preventDefault(); bookingItem.classList.toggle('open'); };
+
+    /* ===== Toast + Loader (same visuals as Create New) ===== */
+    const toast = document.getElementById('toast');
+    const loader = document.getElementById('loader');
+    function showToast(msg){ toast.textContent = msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 2200); }
+    function showLoader(){ loader.classList.add('active'); }
+    function hideLoader(){ loader.classList.remove('active'); }
+
+    /* ===== API base (your latest endpoint via corsproxy) ===== */
+    const scriptBaseURL = "https://corsproxy.io/?" + encodeURIComponent("https://script.google.com/macros/s/AKfycby6aDtkeVhC7JBFmsNo2ZcpNV__X_T4RVBbIumbVHBxVM55pNmmdy_X741YE2grbjAr/exec");
+
+async function fetchJSON(url) {
+  const res = await fetch(url, { cache: 'no-store' });
+  const text = await res.text();
+  if (text.trim().startsWith('<'))
+    throw new Error('Non-JSON response (HTML) – check deployment permissions.');
+  return JSON.parse(text);
+}
+
+
+    /* ===== State ===== */
+    let ALL_ROWS = [];       // all bookings
+    let FILTERED = [];       // after filters
+    const PAGE_SIZE = 20;
+    let page = 1;
+    let totalPages = 1;
+
+
+
+function parseSheetDate(v) {
+  if (!v) return null;
+
+  // Already Date
+  if (v instanceof Date) {
+    const d = new Date(v.getFullYear(), v.getMonth(), v.getDate());
+    d.setDate(d.getDate() + 1);
+    return d;
+  }
+
+  // Sheets serial
+  if (typeof v === "number") {
+    const epoch = new Date(1899, 11, 30);
+    const d = new Date(epoch.getTime() + v * 86400000);
+    d.setDate(d.getDate() + 1);
+    return d;
+  }
+
+  // YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) {
+    const [y, m, d0] = v.split("-").map(Number);
+    const d = new Date(y, m - 1, d0);
+    d.setDate(d.getDate() + 1);
+    return d;
+  }
+
+  // ISO
+  if (!isNaN(Date.parse(v))) {
+    const raw = new Date(v);
+    const d = new Date(raw.getFullYear(), raw.getMonth(), raw.getDate());
+    d.setDate(d.getDate() + 1);
+    return d;
+  }
+
+  return null;
+}
+
+
+
+
+    /* ===== Load bookings (combined) ===== */
+async function loadBookings() {
+  showLoader();
+  try {
+    const rows = await fetchJSON(`${scriptBaseURL}?type=bookings`);
+    ALL_ROWS = hydrateTypes(rows).sort(sortByMostRecent);
+    applyFilters();
+  } catch (e) {
+    console.error(e);
+    showToast('Error loading bookings');
+    renderTable([]);
+  } finally {
+    hideLoader();
+    syncServerBookings(); // 👈 starts the continuous backend sync loop
+  }
+}
+
+
+    function hydrateTypes(rows) {
+      return rows.map(r => {
+        let type = r["Type"];
+        if (!type) type = (typeof r["Flat Sheets King"] !== 'undefined') ? "Airbnb Cleaning" : "Home / Office Cleaning";
+        return { ...r, Type: type };
+      });
+    }
+
+    function sortByMostRecent(a, b) {
+const da = a["Cleaning Date"] ? parseSheetDate(a["Cleaning Date"]).getTime() : 0;
+const db = b["Cleaning Date"] ? parseSheetDate(b["Cleaning Date"]).getTime() : 0;
+
+      if (db !== da) return db - da;
+      // fallback to timestamp or booking id ordering (desc)
+      const ta = a["Timestamp"] ? new Date(a["Timestamp"]).getTime() : 0;
+      const tb = b["Timestamp"] ? new Date(b["Timestamp"]).getTime() : 0;
+      if (tb !== ta) return tb - ta;
+      const ia = (a["Booking ID"] || "").toString();
+      const ib = (b["Booking ID"] || "").toString();
+      return ib.localeCompare(ia);
+    }
+
+    /* ===== Filters ===== */
+    const fSearch = document.getElementById('fSearch');
+    const fType = document.getElementById('fType');
+    const fStatus = document.getElementById('fStatus');
+    const fDate = document.getElementById('fDate');
+    const fClear = document.getElementById('fClear');
+
+    function applyFilters() {
+      const q = (fSearch.value || '').toLowerCase().trim();
+      const t = fType.value;      // all, airbnb, office
+      const s = fStatus.value;    // all or specific
+      const exactDate = fDate.value ? new Date(fDate.value) : null;
+
+      FILTERED = ALL_ROWS.filter(r => {
+        // text search
+        const hay = [
+          r["Booking ID"], r["Property Name"], r["Cleaners"], r["Address"], r["Notes"], r["Note"]
+        ].map(x => (x || '').toString().toLowerCase()).join(' ');
+        if (q && !hay.includes(q)) return false;
+
+        // type
+        const type = (r["Type"] || '').toLowerCase();
+        if (t === 'airbnb' && !type.includes('airbnb')) return false;
+        if (t === 'office' && type.includes('airbnb')) return false;
+
+        // status
+        if (s !== 'all' && r["Status"] !== s) return false;
+
+        // exact date match (same day)
+if (exactDate) {
+  const d = r["Cleaning Date"] ? parseSheetDate(r["Cleaning Date"]) : null;
+  if (!d) return false;
+  if (!isSameDay(d, exactDate)) return false;
+}
+
+
+        return true;
+      });
+
+      page = 1;
+      paginateAndRender();
+    }
+
+    [fSearch, fType, fStatus, fDate].forEach(el => el.addEventListener('input', applyFilters));
+    fClear.addEventListener('click', () => {
+      fSearch.value = ''; fType.value = 'all'; fStatus.value = 'all'; fDate.value = '';
+      applyFilters();
+    });
+
+    function isSameDay(a, b) {
+      return a.getFullYear() === b.getFullYear() &&
+             a.getMonth() === b.getMonth() &&
+             a.getDate() === b.getDate();
+    }
+
+    /* ===== Pagination ===== */
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const pageIndicator = document.getElementById('pageIndicator');
+
+    btnPrev.addEventListener('click', () => { if (page > 1) { page--; paginateAndRender(); } });
+    btnNext.addEventListener('click', () => { if (page < totalPages) { page++; paginateAndRender(); } });
+
+    function paginateAndRender() {
+      const total = FILTERED.length;
+      totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+      if (page > totalPages) page = totalPages;
+
+      const start = (page - 1) * PAGE_SIZE;
+      const end = start + PAGE_SIZE;
+      const slice = FILTERED.slice(start, end);
+
+      renderTable(slice);
+
+      pageIndicator.textContent = `Page ${page} of ${totalPages}`;
+      btnPrev.disabled = (page <= 1);
+      btnNext.disabled = (page >= totalPages);
+    }
+
+    /* ===== Table Render ===== */
+    function renderTable(rows) {
+      const tbody = document.querySelector('#bookingsTable tbody');
+      if (!rows || rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;">No bookings found</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = rows.map(r => {
+        const id = r["Booking ID"] || "";
+        const propFull = r["Property Name"] || "";
+        const propTrunc = truncateWords(propFull, 3);
+        const cleaner = r["Cleaners"] || "";
+        const date = r["Cleaning Date"] ? formatDateCell(r["Cleaning Date"]) : "";
+        const b2b = r["B2B"] || "";
+        const type = r["Type"] || (r["Flat Sheets King"] ? "Airbnb Cleaning" : "Home / Office Cleaning");
+        const status = r["Status"] || "Pending";
+
+        return `
+          <tr data-id="${escapeHtml(id)}" data-type="${escapeHtml(type)}">
+            <td>${escapeHtml(id)}</td>
+            <td class="cell-actions" onclick="event.stopPropagation();">
+              <select class="status-select" data-id="${escapeHtml(id)}">
+                ${["Pending", "Clean Underway", "Completed"].map(s => `<option value="${s}" ${status===s?"selected":""}>${s}</option>`).join("")}
+              </select>
+            </td>
+            <td title="${escapeHtml(propFull)}"><span class="prop-trunc">${escapeHtml(propTrunc)}</span></td>
+            <td>${escapeHtml(cleaner)}</td>
+            <td>${escapeHtml(date)}</td>
+            <td>${escapeHtml(b2b)}</td>
+            <td>${escapeHtml(type)}</td>
+          </tr>
+        `;
+      }).join("");
+
+      // Row click -> open drawer
+      document.querySelectorAll('#bookingsTable tbody tr').forEach(tr => {
+        tr.addEventListener('click', () => openDrawerWith(tr.dataset.id));
+      });
+
+      // Inline status change
+      document.querySelectorAll('.status-select').forEach(sel => {
+        sel.addEventListener('change', async (e) => {
+          const bookingId = e.target.getAttribute('data-id');
+          const newStatus = e.target.value;
+          const row = e.target.closest('tr');
+          await updateStatus(bookingId, newStatus, row);
+        });
+      });
+    }
+
+    function truncateWords(str, count) {
+      if (!str) return '';
+      const parts = str.trim().split(/\s+/);
+      if (parts.length <= count) return str;
+      return parts.slice(0, count).join(' ') + '…';
+    }
+
+function formatDateCell(v) {
+  const d = parseSheetDate(v); // already +1 day
+  return d ? d.toLocaleDateString("en-AU") : "";
+}
+
+
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    /* ===== Inline Status Update ===== */
+    async function updateStatus(bookingId, status, rowEl) {
+      try {
+        showLoader();
+        await fetch(scriptBaseURL, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ action: 'updateStatus', bookingId, status })
+        });
+        showToast('Status updated');
+        rowEl.classList.add('flash');
+        setTimeout(() => rowEl.classList.remove('flash'), 800);
+      } catch (e) {
+        console.error(e);
+        showToast('Error updating status');
+      } finally {
+        hideLoader();
+      }
+    }
+
+    /* ===== Drawer (view/edit) ===== */
+    const drawer = document.getElementById('drawer');
+    const drawerOverlay = document.getElementById('drawerOverlay');
+    const dwClose = document.getElementById('dwClose');
+    const dwCancel = document.getElementById('dwCancel');
+    const dwSave = document.getElementById('dwSave');
+
+    const dwTitle = document.getElementById('dwTitle');
+    const dwId = document.getElementById('dwId');
+    const dwType = document.getElementById('dwType');
+    const dwProp = document.getElementById('dwProp');
+    const dwAddr = document.getElementById('dwAddr');
+    const dwCleaner = document.getElementById('dwCleaner');
+    const dwDate = document.getElementById('dwDate');
+    const dwStatus = document.getElementById('dwStatus');
+    const dwB2BYes = document.getElementById('dwB2BYes');
+    const dwB2BNo = document.getElementById('dwB2BNo');
+    const dwNotes = document.getElementById('dwNotes');
+    const dwAirbnbSection = document.getElementById('dwAirbnbSection');
+    const dwLinenGrid = document.getElementById('dwLinenGrid');
+
+    let CURRENT_EDIT = null;
+
+    // ===================================================
+// 🔁 Auto-sync bookings backend (every 5 seconds)
+// ===================================================
+let SYNC_RUNNING = false;
+
+async function syncServerBookings() {
+  if (SYNC_RUNNING) return;
+  SYNC_RUNNING = true;
+  try {
+    await fetch(scriptBaseURL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'syncAllBookings' })
+    });
+    console.log('✅ Bookings synced successfully');
+  } catch (err) {
+    console.error('⚠️ Sync failed:', err);
+  } finally {
+    SYNC_RUNNING = false;
+    setTimeout(syncServerBookings, 5000);
+  }
+}
+
+
+
+    function openDrawerWith(bookingId) {
+      const row = ALL_ROWS.find(r => (r["Booking ID"] || '') === bookingId);
+      if (!row) return;
+
+      CURRENT_EDIT = JSON.parse(JSON.stringify(row));
+      const type = row["Type"] || (row["Flat Sheets King"] ? "Airbnb Cleaning" : "Home / Office Cleaning");
+
+      dwTitle.textContent = `Booking Details — ${bookingId}`;
+      dwId.value = row["Booking ID"] || '';
+      dwType.value = type;
+      dwProp.value = row["Property Name"] || '';
+      dwAddr.value = row["Address"] || '';
+      dwCleaner.value = row["Cleaners"] || '';
+      dwDate.value = toDateInput(row["Cleaning Date"]);
+      dwStatus.value = row["Status"] || 'Pending';
+      const b2b = (row["B2B"] || 'No').toLowerCase();
+      if (b2b === 'yes') { dwB2BYes.classList.add('active'); dwB2BNo.classList.remove('active'); } else { dwB2BNo.classList.add('active'); dwB2BYes.classList.remove('active'); }
+      dwNotes.value = row["Notes"] || row["Note"] || '';
+
+      if (type.toLowerCase().includes('airbnb')) {
+        dwAirbnbSection.style.display = 'block';
+        renderLinenInputs(row);
+      } else {
+        dwAirbnbSection.style.display = 'none';
+        dwLinenGrid.innerHTML = '';
+      }
+
+      drawer.classList.add('active');
+      drawerOverlay.classList.add('active');
+    }
+
+    function toDateInput(v) {
+  if (!v) return '';
+  const d = parseSheetDate(v); // already +1 inside parseSheetDate
+  if (!d || isNaN(d)) return '';
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+
+
+    function renderLinenInputs(row) {
+  const dwLinenGrid = document.getElementById('dwLinenGrid');
+  const dwTotal = document.getElementById('dwTotal');
+
+  const bedItems = [
+    ["Flat Sheets King", "FS K"],
+    ["Flat Sheets Queen", "FS Q"],
+    ["Flat Sheets Double", "FS D"],
+    ["Flat Sheets Single", "FS S"],
+    ["Doona King", "DK"],
+    ["Doona Queen", "DQ"],
+    ["Doona Double", "DD"],
+    ["Doona Single", "DS"],
+    ["Pillowcases", "Pillow"],
+    ["King Fitted", "KF"],
+    ["Queen Fitted", "QF"],
+    ["Single Fitted", "SF"]
+  ];
+
+  const bathItems = [
+    ["Bath Towels", "BT"],
+    ["Hand Towels", "HT"],
+    ["Face Towels", "FT"],
+    ["Bathmats", "BM"],
+    ["Tea Towels", "TT"]
+  ];
+
+  const createRow = (title, icon, items) => {
+    const chips = items
+      .filter(([key]) => row[key] && row[key] !== "")
+      .map(([key, short]) => `<span>${short}: ${row[key]}</span>`)
+      .join(" ");
+    return `
+      <div class="linen-row">
+        <div class="linen-title"><i class="fa-solid ${icon}"></i> ${title}</div>
+        <div class="linen-items">${chips || "<span style='color:#aaa;'>—</span>"}</div>
+      </div>
+    `;
+  };
+
+  dwLinenGrid.innerHTML = `
+    ${createRow("Bed Linen", "fa-bed", bedItems)}
+    ${createRow("Bath & Towels", "fa-bath", bathItems)}
+  `;
+
+  const total = [...bedItems, ...bathItems].reduce((sum, [key]) => sum + (Number(row[key]) || 0), 0);
+  dwTotal.textContent = `Total: $${total}`;
+}
+
+
+
+    function closeDrawer() {
+      drawer.classList.remove('active');
+      drawerOverlay.classList.remove('active');
+      CURRENT_EDIT = null;
+    }
+
+    dwClose.onclick = closeDrawer;
+    dwCancel.onclick = closeDrawer;
+
+    // B2B toggles
+    dwB2BYes.onclick = () => { dwB2BYes.classList.add('active'); dwB2BNo.classList.remove('active'); };
+    dwB2BNo.onclick = () => { dwB2BNo.classList.add('active'); dwB2BYes.classList.remove('active'); };
+
+    // Save from drawer
+    dwSave.onclick = async () => {
+      if (!CURRENT_EDIT) return;
+      const payload = {
+        action: 'updateBooking',
+        bookingId: dwId.value,
+        cleaner: dwCleaner.value,
+        date: dwDate.value,
+        status: dwStatus.value,
+        b2b: dwB2BYes.classList.contains('active') ? 'Yes' : 'No',
+        notes: dwNotes.value,
+        linen: {}
+      };
+
+      if (dwAirbnbSection.style.display !== 'none') {
+        dwLinenGrid.querySelectorAll('input[data-linen]').forEach(inp => {
+          const k = inp.getAttribute('data-linen');
+          payload.linen[k] = Number(inp.value || 0);
+        });
+      }
+
+      try {
+        showLoader();
+        await fetch(scriptBaseURL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        showToast('Saved changes');
+        await loadBookings(); // refresh list, preserves current filters by reapplying after load
+        closeDrawer();
+      } catch (e) {
+        console.error(e);
+        showToast('Error saving changes');
+      } finally {
+        hideLoader();
+      }
+    };
+
+
+    /* ===== Mobile drawer swipe-close + body scroll lock ===== */
+let startY = 0;
+let currentY = 0;
+let isDragging = false;
+
+drawer.addEventListener('touchstart', (e) => {
+  if (window.innerWidth > 768) return; // only on mobile
+  startY = e.touches[0].clientY;
+  isDragging = true;
+});
+
+drawer.addEventListener('touchmove', (e) => {
+  if (!isDragging || window.innerWidth > 768) return;
+  currentY = e.touches[0].clientY;
+  const diff = currentY - startY;
+  if (diff > 0) {
+    drawer.style.transform = `translateY(${diff}px)`;
+  }
+});
+
+drawer.addEventListener('touchend', () => {
+  if (!isDragging || window.innerWidth > 768) return;
+  isDragging = false;
+  const diff = currentY - startY;
+
+  if (diff > 100) {
+    // swipe down enough → close
+    closeDrawer();
+  } else {
+    // not enough → snap back up
+    drawer.style.transition = 'transform 0.3s ease';
+    drawer.style.transform = 'translateY(0)';
+    setTimeout(() => drawer.style.transition = '', 300);
+  }
+});
+
+// Disable body scroll when drawer is open (mobile only)
+const toggleBodyScroll = (lock) => {
+  document.body.style.overflow = lock ? 'hidden' : '';
+};
+
+const observer = new MutationObserver(() => {
+  if (window.innerWidth <= 768) {
+    toggleBodyScroll(drawer.classList.contains('active'));
+  }
+});
+
+observer.observe(drawer, { attributes: true, attributeFilter: ['class'] });
+
+    
+    /* ===== Boot ===== */
+    loadBookings();
+  </script>
+
+</body>
+</html>
