@@ -125,11 +125,17 @@
     transform:translateY(-2px);
   }
 
-  img.logo {
-    width:120px;
-    margin-bottom:16px;
-    opacity:0.95;
-  }
+.logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.logo img {
+  height: 40px;   /* choose your preferred display height */
+  width: auto;
+}
 </style>
 </head>
 
@@ -142,8 +148,9 @@
   <i class="fa-solid fa-bucket float-icon" style="top:70%; left:78%; animation-delay:3s;"></i>
 
   <div class="wrap">
+    <div class="logo">
     <img src="https://raw.githubusercontent.com/Levinders/CMS-for-a-cleaning-business/refs/heads/main/Airbnb._Home._Office.__2_-removebg-preview.png" alt="Dawn Cli Logo">
-
+    </div>
     <h1>404</h1>
 
     <h2>Oops... wrong hallway 😅</h2>
