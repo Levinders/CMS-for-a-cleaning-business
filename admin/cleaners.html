@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HomeGlitz — Cleaners</title>
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Levinders/homeglitz/refs/heads/main/64%C3%9764pxlogo.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0F72B4;
+      --primary-light: #f5faff;
+      --text: #222;
+      --muted: #6c757d;
+      --panel: #fff;
+      --border: #e4e9ef;
+      --radius: 12px;
+      --shadow: 0 6px 20px rgba(15,114,180,0.1);
+      --transition: 0.3s ease;
+    }
+    * { box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+    html, body { margin: 0; padding: 0; overflow-x: hidden; }
+    body { display: flex; min-height: 100vh; background: var(--primary-light); color: var(--text); }
+
+    /* ---- USER MENU + LOGOUT DROPDOWN ---- */
+
+.user-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+#userIcon {
+  cursor: pointer;
+  font-size: 18px;
+  transition: 0.2s ease;
+}
+
+#userIcon:hover {
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+/* Dropdown */
+.logout-dropdown {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  border-radius: 10px;
+  padding: 8px 0;
+  width: 160px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: 0.25s ease;
+  z-index: 2000;
+}
+
+.logout-dropdown.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Logout Button */
+#logoutBtn {
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+#logoutBtn i {
+  color: var(--primary);
+}
+
+#logoutBtn:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+/* Align all icons horizontally with proper spacing */
+.topbar-right i,
+#userIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+    /* === Sidebar & Topbar === */
+    .sidebar {
+      position: fixed; left: 0; top: 0; bottom: 0;
+      width: 250px; background: var(--panel); border-right: 1px solid var(--border);
+      box-shadow: var(--shadow); display: flex; flex-direction: column;
+      padding: 20px 0; overflow-y: auto; z-index: 2000;
+    }
+    .sidebar .brand { display: flex; align-items: center; justify-content: center; margin-bottom: 30px; }
+    .sidebar .brand img { height: 48px; }
+    .nav-links { list-style: none; padding: 0; margin: 0; }
+    .nav-item { position: relative; }
+    .nav-links li a {
+      display: flex; align-items: center; gap: 12px; padding: 14px 22px;
+      color: var(--muted); font-weight: 500; text-decoration: none; transition: all var(--transition);
+    }
+    .nav-links li a:hover, .nav-links li a.active {
+      background: var(--primary-light); color: var(--primary); border-left: 4px solid var(--primary);
+    }
+    .sub-menu { display: none; flex-direction: column; margin-left: 40px; font-size: 12px; }
+    .nav-item.open .sub-menu { display: flex; }
+
+    .topbar {
+      height: 60px; background: var(--panel); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 25px; box-shadow: var(--shadow);
+      position: fixed; top: 0; left: 250px; right: 0; z-index: 1000;
+    }
+
+    .menu-toggle { background: none; border: none; font-size: 20px; color: var(--primary); cursor: pointer; }
+    .topbar-right { display: flex; align-items: center; gap: 20px; color: var(--muted); }
+
+    main { flex: 1; margin-left: 250px; padding: 100px 40px 40px; background: var(--primary-light); }
+
+    /* === Card & Table === */
+    .card {
+      background: var(--panel);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      padding: 10px 25px;
+    }
+
+    .card__title {
+      font-size: 22px; font-weight: 700; color: var(--primary);
+      display: flex; align-items: center; gap: 10px;
+      border-bottom: 2px solid rgba(15,114,180,0.1);
+      padding-bottom: 10px; margin-bottom: 25px;
+      justify-content: space-between;
+    }
+
+    .filter-bar {
+      display: flex; gap: 10px; align-items: center;
+      position: sticky; top: 80px; background: var(--panel);
+      padding: 10px 0; z-index: 10;
+    }
+
+    .filter-bar input, .filter-bar select {
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 14px;
+    }
+    th { background: #f9fbfd; color: var(--primary); font-weight: 600; text-align: left; }
+    tr:hover td { background: #f9fafb; }
+
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+      transition: 0.2s ease;
+    }
+    .btn.add { background: var(--primary); color: #fff; }
+    .btn.edit { background: #eef3ff; color: var(--primary); }
+    .btn.delete { background: #fdeaea; color: #c0392b; }
+
+    /* === Drawer === */
+    .drawer {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translate(-50%, 100%);
+      background: var(--panel);
+      border-radius: 20px;
+      box-shadow: 0 -6px 20px rgba(0,0,0,0.1);
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 5000;
+      width: 600px;
+      max-width: 95%;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .drawer.active { transform: translate(-50%, 0); }
+
+    .drawer__header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .drawer__body {
+      padding: 20px 24px;
+      flex: 1;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px 24px;
+    }
+    .drawer__body .group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--primary);
+      font-size: 15px;
+    }
+    .drawer__body .group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    .drawer__footer {
+      padding: 14px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* === Mobile === */
+    @media (max-width: 768px) {
+      main { margin-left: 0; padding: 90px 12px 40px; }
+      .sidebar { left: -250px; position: fixed; }
+      .sidebar.open { left: 0; }
+      .topbar { left: 0; right: 0; position: fixed; }
+      .drawer {
+        left: 0;
+        width: 100%;
+        border-radius: 20px 20px 0 0;
+        transform: translateY(100%);
+      }
+      .drawer.active { transform: translateY(0); }
+      .drawer__body { grid-template-columns: 1fr; }
+    }
+
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.25);
+      backdrop-filter: blur(3px);
+      opacity: 0; visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 4000;
+    }
+    .overlay.active { opacity: 1; visibility: visible; }
+
+    .hz-toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: #0F72B4; color: #fff; padding: 12px 16px;
+      border-radius: 10px; font-weight: 600;
+      box-shadow: 0 10px 24px rgba(15,114,180,.25);
+      opacity: 0; transform: translateY(16px);
+      transition: .3s ease; z-index: 6000;
+    }
+    .hz-toast.show { opacity: 1; transform: translateY(0); }
+
+
+    .card__title {
+  background: var(--panel);
+  position: sticky;
+  top: 80px;
+  z-index: 20;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+  </style>
+</head>
+
+<body>
+  
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><img src="https://raw.githubusercontent.com/Levinders/homeglitz/refs/heads/main/mainlogog-removebg-preview.png"></div>
+    <ul class="nav-links">
+      <li><a href="/homeglitz/others/admin-404-page.html"><i class="fa-solid fa-chart-line"></i> Overview</a></li>
+      <li class="nav-item">
+        <a href="#" id="bookingMenu"><i class="fa-solid fa-broom"></i> Bookings <i class="fa-solid fa-chevron-down" style="margin-left:auto;"></i></a>
+        <div class="sub-menu"><a href="booking.html">Create New</a><a href="all-bookings.html">All Bookings</a></div>
+      </li>
+      <li><a href="/homeglitz/admin/payments.html"><i class="fa-solid fa-wallet"></i><span> Payments</span></a></li>
+      <li><a href="/homeglitz/others/admin-404-page.html"><i class="fa-solid fa-house-user"></i> Properties</a></li>
+      <li><a href="/homeglitz/admin/cleaners.html" class="active"><i class="fa-solid fa-users"></i> Cleaners</a></li>
+      <li><a href="/homeglitz/others/admin-404-page.html"><i class="fa-solid fa-chart-pie"></i> Reports</a></li>
+      <li><a href="/homeglitz/others/admin-404-page.html"><i class="fa-solid fa-gear"></i> Settings</a></li>
+    </ul>
+  </aside>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div style="flex:1; display:flex; flex-direction:column;">
+
+<header class="topbar">
+  <button class="menu-toggle" id="menuToggle">
+    <i class="fa-solid fa-bars"></i>
+  </button>
+
+  <div class="topbar-right">
+    <i class="fa-regular fa-bell"></i>
+
+    <div class="user-menu">
+      <i class="fa-regular fa-user" id="userIcon"></i>
+
+      <div class="logout-dropdown" id="logoutDropdown">
+        <button id="logoutBtn">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+    <main>
+      <div class="card">
+<h2 class="card__title" style="position:sticky;z-index:20; background:var(--panel);">
+  <span><i class="fa-solid fa-users"></i> Cleaners Management</span>
+  <div class="filter-bar" style="display:flex; gap:10px; align-items:center;">
+    <input type="text" id="searchInput" placeholder="Search cleaners..." />
+    <select id="statusFilter">
+      <option value="all">All</option>
+      <option value="active">Active</option>
+      <option value="inactive">Inactive</option>
+    </select>
+    <button class="btn add" onclick="openDrawer()">+ Add Cleaner</button>
+  </div>
+</h2>
+
+
+        <table id="cleanersTable">
+          <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Jobs</th><th>Earnings</th><th>Unpaid</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- Drawer -->
+  <div class="drawer" id="drawer">
+    <div class="drawer__header">
+      <div class="drawer__header-left">
+        <div class="avatar" id="drawerAvatar">CL</div>
+        <span id="drawerTitle">Add Cleaner</span>
+      </div>
+      <i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="closeDrawer()"></i>
+    </div>
+
+    <div class="drawer__body">
+      <input type="hidden" id="cleanerId">
+      <div class="group"><label>Name</label><input id="cleanerName"></div>
+      <div class="group"><label>Email</label><input id="cleanerEmail" type="email"></div>
+      <div class="group"><label>Phone</label><input id="cleanerPhone"></div>
+      <div class="group"><label>Password</label><input id="cleanerPassword" type="text"></div>
+      <div class="group"><label>Bio / Notes</label><input id="cleanerNotes"></div>
+      <div class="group"><label>Active (Yes/No)</label><input id="cleanerActive"></div>
+
+      <div class="group"><label>Total Jobs</label><input id="cleanerJobs" disabled></div>
+      <div class="group"><label>Total Earnings</label><input id="cleanerEarnings" disabled></div>
+      <div class="group"><label>Outstanding</label><input id="cleanerOutstanding" disabled></div>
+    </div>
+
+    <div class="drawer__footer">
+      <button class="btn delete" onclick="deleteCleaner(document.getElementById('cleanerId').value)">Delete</button>
+      <button class="btn add" onclick="saveCleaner()">Save</button>
+    </div>
+  </div>
+
+  <div class="hz-toast" id="toast"></div>
+
+  <script>
+        // ========= Admin Gate =========
+if (localStorage.getItem("homeglitzAdminAuth") !== "true") {
+  window.location.href = "login.html";
+}
+
+
+    // Toggle dropdown
+const userIcon = document.getElementById("userIcon");
+const logoutDropdown = document.getElementById("logoutDropdown");
+
+userIcon.addEventListener("click", () => {
+  logoutDropdown.classList.toggle("active");
+});
+
+// Click outside to close
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".user-menu")) {
+    logoutDropdown.classList.remove("active");
+  }
+});
+
+    // ========= LOGOUT ACTION =========
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  // Fade animation
+  document.body.style.transition = "opacity 0.4s ease";
+  document.body.style.opacity = "0";
+
+  setTimeout(() => {
+    localStorage.removeItem("homeglitzAdminAuth");
+    window.location.href = "login.html";
+  }, 400);
+});
+
+
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  const menuToggle = document.getElementById('menuToggle');
+  const bookingMenu = document.getElementById('bookingMenu');
+  const bookingItem = bookingMenu.parentElement;
+  const drawer = document.getElementById('drawer');
+  const toast = document.getElementById('toast');
+  const drawerAvatar = document.getElementById('drawerAvatar');
+  const scriptBaseURL = "https://corsproxy.io/?" + encodeURIComponent("https://script.google.com/macros/s/AKfycby6aDtkeVhC7JBFmsNo2ZcpNV__X_T4RVBbIumbVHBxVM55pNmmdy_X741YE2grbjAr/exec");
+  let cleanersData = [];
+
+  menuToggle.onclick = () => { sidebar.classList.toggle('open'); overlay.classList.toggle('active'); };
+  overlay.onclick = () => { sidebar.classList.remove('open'); overlay.classList.remove('active'); closeDrawer(); };
+  bookingMenu.onclick = (e) => { e.preventDefault(); bookingItem.classList.toggle('open'); };
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+  function initials(name) {
+    if (!name) return "CL";
+    const parts = name.trim().split(" ");
+    return (parts[0][0] + (parts[1]?.[0] || "")).toUpperCase();
+  }
+
+  function openDrawer(cleaner = null) {
+    document.getElementById('drawerTitle').textContent = cleaner ? cleaner['Cleaner Name'] : 'Add Cleaner';
+    document.getElementById('cleanerId').value = cleaner?.['Cleaner ID'] || '';
+    document.getElementById('cleanerName').value = cleaner?.['Cleaner Name'] || '';
+    document.getElementById('cleanerEmail').value = cleaner?.['Email'] || '';
+    document.getElementById('cleanerPhone').value = cleaner?.['Phone'] || '';
+    document.getElementById('cleanerPassword').value = cleaner?.['Password'] || '';
+    document.getElementById('cleanerNotes').value = cleaner?.['Notes'] || '';
+    document.getElementById('cleanerActive').value = (cleaner?.['Active'] === true || cleaner?.['Active'] === "Yes") ? 'Yes' : 'No';
+    document.getElementById('cleanerJobs').value = cleaner?.['Total Jobs Completed'] || 0;
+    document.getElementById('cleanerEarnings').value = cleaner?.['Total Earnings (Ex GST)'] || 0;
+    document.getElementById('cleanerOutstanding').value = cleaner?.['Outstanding Balance'] || 0;
+
+    drawerAvatar.textContent = cleaner ? initials(cleaner['Cleaner Name']) : "CL";
+    drawer.classList.add('active');
+    overlay.classList.add('active');
+  }
+
+  function closeDrawer() {
+    drawer.classList.remove('active');
+    overlay.classList.remove('active');
+  }
+
+  async function loadCleaners() {
+    try {
+      const res = await fetch(`${scriptBaseURL}?type=cleanersList`, { cache: "no-store" });
+      const text = await res.text();
+      if (text.trim().startsWith("<")) return showToast("Access error");
+      cleanersData = JSON.parse(text);
+      renderCleaners(cleanersData);
+    } catch (err) { console.error(err); showToast("Error loading cleaners"); }
+  }
+
+  function renderCleaners(rows) {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const status = document.getElementById('statusFilter').value;
+    const tbody = document.querySelector("#cleanersTable tbody");
+    const filtered = rows.filter(c => {
+      const active = (c["Active"] || "").toString().toLowerCase() === "yes";
+      const matchSearch = c["Cleaner Name"]?.toLowerCase().includes(search) || c["Email"]?.toLowerCase().includes(search);
+      const matchStatus = status === "all" || (status === "active" && active) || (status === "inactive" && !active);
+      return matchSearch && matchStatus;
+    });
+    tbody.innerHTML = filtered.map(c => `
+      <tr>
+        <td>${c["Cleaner Name"] || ""}</td>
+        <td>${c["Email"] || ""}</td>
+        <td>${c["Phone"] || ""}</td>
+        <td>${c["Total Jobs Completed"] || 0}</td>
+        <td>$${c["Total Earnings (Ex GST)"] || 0}</td>
+        <td>$${c["Outstanding Balance"] || 0}</td>
+        <td>${(c["Active"] || "").toLowerCase() === "yes" ? "✅" : "❌"}</td>
+        <td><button class="btn edit" onclick='openDrawer(${JSON.stringify(c)})'><i class="fa fa-edit"></i></button></td>
+      </tr>
+    `).join("");
+  }
+
+async function saveCleaner() {
+  const isNew = !document.getElementById('cleanerId').value; // NEW → Detect new cleaner
+
+  const payload = {
+    action: 'saveCleaner',
+    cleanerId: document.getElementById('cleanerId').value,
+    name: document.getElementById('cleanerName').value,
+    email: document.getElementById('cleanerEmail').value,
+    phone: document.getElementById('cleanerPhone').value,
+    password: document.getElementById('cleanerPassword').value,
+    notes: document.getElementById('cleanerNotes').value,
+    active: document.getElementById('cleanerActive').value || 'Yes'
+  };
+
+  // Save to backend
+  await fetch(scriptBaseURL, { 
+    method: 'POST', 
+    headers: { 'Content-Type': 'application/json' }, 
+    body: JSON.stringify(payload) 
+  });
+
+  // ⭐ NEW EMAIL TRIGGER ⭐
+  if (isNew) {
+    const emailPayload = {
+      action: 'sendCleanerWelcome',
+      name: payload.name,
+      email: payload.email,
+      password: payload.password
+    };
+
+    await fetch(scriptBaseURL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(emailPayload)
+    });
+  }
+
+  closeDrawer();
+  showToast('Cleaner saved');
+  setTimeout(loadCleaners, 800);
+}
+
+
+  async function deleteCleaner(id) {
+    if (!confirm('Delete this cleaner?')) return;
+    await fetch(scriptBaseURL, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'deleteCleaner', cleanerId: id })
+    });
+    closeDrawer(); showToast('Cleaner deleted'); setTimeout(loadCleaners, 800);
+  }
+
+  document.getElementById("searchInput").oninput = () => renderCleaners(cleanersData);
+  document.getElementById("statusFilter").onchange = () => renderCleaners(cleanersData);
+
+  loadCleaners();
+  </script>
+</body>
+</html>
