@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>HomeGlitz — Cleaner login</title>
-<link rel="icon" href="https://raw.githubusercontent.com/Levinders/homeglitz/refs/heads/main/64%C3%9764pxlogo.png"/>
+<title>Dawn Cli — Cleaner login</title>
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Levinders/CMS-for-a-cleaning-business/refs/heads/main/D-removebg-preview.png" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -16,6 +16,7 @@
     height:100%;margin:0;background:#f5faff;
     animation:fadeIn .5s ease;
   }
+
 
   .input-wrap {
   position: relative;
@@ -186,7 +187,7 @@
     <div class="card" role="main" id="cardBox">
 
       <div class="logo">
-        <img src="https://raw.githubusercontent.com/Levinders/homeglitz/refs/heads/main/mainlogog-removebg-preview.png">
+        <img src="https://raw.githubusercontent.com/Levinders/CMS-for-a-cleaning-business/refs/heads/main/Airbnb._Home._Office.__2_-removebg-preview.png" alt="Dawn Cli Logo">
 
       </div>
 
@@ -212,13 +213,16 @@
 
       <div class="inline-msg" id="msg"></div>
 
-      <a class="small-link" href="">© HomeGlitz</a>
+      <a class="small-link" href="https://levinders.github.io/portfolio">© Raphael Levinders</a>
+   
+      <a class="small-link" style="color: #595555;">Test login, copy paste: <br/>[Email: camara.loud@dawncli.com] <br/> [Password: 123456]</a>
+
 
     </div>
   </div>
 
 <script>
-const PROXY_BASE = "https://homeglitz.raphaellevinders.workers.dev/";
+const PROXY_BASE = "https://base444.raphaellevinders.workers.dev/";
 const btnLogin = document.getElementById("btnLogin");
 const msgEl = document.getElementById("msg");
 const cardBox = document.getElementById("cardBox");
@@ -279,7 +283,7 @@ btnLogin.addEventListener("click", async () => {
     localStorage.setItem("homeglitz_cleaner_id", json.cleanerId || "");
     localStorage.setItem("homeglitz_cleaner_name", json.name || "");
 
-    window.location.href = "/homeglitz/cleaner/portal.html";
+    window.location.href = "/CMS-for-a-cleaning-business/cleaner/portal.html";
   }
   catch(e){
     msgEl.textContent = "Network error — check deployment";
