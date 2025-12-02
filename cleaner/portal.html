@@ -1161,7 +1161,6 @@ setTimeout(async () => {
 
   const amount = Number(amountRaw);
 
-  // No restrictions — always allow
   btnRequestPayment.classList.add('disabled');
   attachSpinner(btnRequestPayment);
 
@@ -1185,13 +1184,45 @@ setTimeout(async () => {
 
     showToast('Payment request sent', { duration: 3500 });
 
+    // ✅ Mark payment status locally
     CURRENT['Payment Status'] = 'Pending';
 
-    // DO NOT disable — allow multiple if needed
-    btnRequestPayment.classList.remove('disabled');
+    // ✅ Hide action buttons
+    btnSaveStatus.style.display = 'none';
+    btnRequestPayment.style.display = 'none';
 
-    setTimeout(loadTasks, 700);
-    closeDrawer();
+    // ✅ Add polished notice
+    const noticeId = 'paymentNoticeAfterRequest';
+    let notice = document.getElementById(noticeId);
+    if (!notice) {
+      notice = document.createElement('div');
+      notice.id = noticeId;
+      notice.innerHTML = `
+        <div style="
+          background:#fff8e6;
+          border:1px solid #ffe8b3;
+          color:#9a6200;
+          border-radius:12px;
+          padding:10px 14px;
+          margin-top:10px;
+          font-weight:600;
+          text-align:center;
+        ">
+          <i class="fa-solid fa-circle-info"></i>
+          Payment request already submitted for this job.
+        </div>
+      `;
+      const body = drawer.querySelector('.body');
+      const paymentSection = body.querySelector('#dwRequestAmount').closest('div');
+      body.insertBefore(notice, paymentSection);
+    }
+
+    // ✅ Reload & close drawer
+    setTimeout(async () => {
+      await loadTasks();
+      closeDrawer();
+    }, 1000);
+
   } catch (err) {
     console.error(err);
     showToast('Network error — could not send request', { duration: 3500 });
@@ -1200,6 +1231,7 @@ setTimeout(async () => {
     btnRequestPayment.classList.remove('disabled');
   }
 });
+
 
 
 /* ---------------------------
