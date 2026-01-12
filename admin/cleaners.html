@@ -531,56 +531,90 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
   }
 
 async function saveCleaner() {
-  const isNew = !document.getElementById('cleanerId').value; // NEW → Detect new cleaner
+  const id = document.getElementById('cleanerId').value;
+  const isNew = !id;
 
-  const payload = {
-    action: 'saveCleaner',
-    cleanerId: document.getElementById('cleanerId').value,
-    name: document.getElementById('cleanerName').value,
-    email: document.getElementById('cleanerEmail').value,
-    phone: document.getElementById('cleanerPhone').value,
-    password: document.getElementById('cleanerPassword').value,
-    notes: document.getElementById('cleanerNotes').value,
-    active: document.getElementById('cleanerActive').value || 'Yes'
+  const cleaner = {
+    "Cleaner ID": id || "temp-" + Date.now(),
+    "Cleaner Name": document.getElementById('cleanerName').value,
+    "Email": document.getElementById('cleanerEmail').value,
+    "Phone": document.getElementById('cleanerPhone').value,
+    "Password": document.getElementById('cleanerPassword').value,
+    "Notes": document.getElementById('cleanerNotes').value,
+    "Active": document.getElementById('cleanerActive').value || "Yes",
+    "Total Jobs Completed": 0,
+    "Total Earnings (Ex GST)": 0,
+    "Outstanding Balance": 0
   };
 
-  // Save to backend
-  await fetch(scriptBaseURL, { 
-    method: 'POST', 
-    headers: { 'Content-Type': 'application/json' }, 
-    body: JSON.stringify(payload) 
+  // 🔥 OPTIMISTIC UI UPDATE
+  if (isNew) {
+    cleanersData.unshift(cleaner);
+  } else {
+    const index = cleanersData.findIndex(c => c["Cleaner ID"] === id);
+    if (index !== -1) cleanersData[index] = cleaner;
+  }
+
+  renderCleaners(cleanersData);
+  closeDrawer();
+  showToast("Cleaner saved");
+
+  // 🔁 BACKEND SYNC (async, non-blocking)
+  await fetch(scriptBaseURL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "saveCleaner",
+      cleanerId: id,
+      name: cleaner["Cleaner Name"],
+      email: cleaner["Email"],
+      phone: cleaner["Phone"],
+      password: cleaner["Password"],
+      notes: cleaner["Notes"],
+      active: cleaner["Active"]
+    })
   });
 
-  // ⭐ NEW EMAIL TRIGGER ⭐
+  // Welcome email only for new
   if (isNew) {
-    const emailPayload = {
-      action: 'sendCleanerWelcome',
-      name: payload.name,
-      email: payload.email,
-      password: payload.password
-    };
-
     await fetch(scriptBaseURL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(emailPayload)
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "sendCleanerWelcome",
+        name: cleaner["Cleaner Name"],
+        email: cleaner["Email"],
+        password: cleaner["Password"]
+      })
     });
   }
 
-  closeDrawer();
-  showToast('Cleaner saved');
-  setTimeout(loadCleaners, 800);
+  // 🔁 FINAL SYNC (optional, safe)
+  setTimeout(loadCleaners, 1500);
 }
 
 
-  async function deleteCleaner(id) {
-    if (!confirm('Delete this cleaner?')) return;
-    await fetch(scriptBaseURL, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'deleteCleaner', cleanerId: id })
-    });
-    closeDrawer(); showToast('Cleaner deleted'); setTimeout(loadCleaners, 800);
-  }
+
+async function deleteCleaner(id) {
+  if (!confirm("Delete this cleaner?")) return;
+
+  // 🔥 OPTIMISTIC REMOVE
+  cleanersData = cleanersData.filter(c => c["Cleaner ID"] !== id);
+  renderCleaners(cleanersData);
+  closeDrawer();
+  showToast("Cleaner deleted");
+
+  // Backend
+  await fetch(scriptBaseURL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "deleteCleaner", cleanerId: id })
+  });
+
+  // Safety sync
+  setTimeout(loadCleaners, 1500);
+}
+
 
   document.getElementById("searchInput").oninput = () => renderCleaners(cleanersData);
   document.getElementById("statusFilter").onchange = () => renderCleaners(cleanersData);
