@@ -505,7 +505,9 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
     const status = document.getElementById('statusFilter').value;
     const tbody = document.querySelector("#cleanersTable tbody");
     const filtered = rows.filter(c => {
-      const active = (c["Active"] || "").toString().toLowerCase() === "yes";
+      const active = ["yes", "true", "active", "1"].includes(
+        (c["Active"] || "").toString().toLowerCase()
+      );
       const matchSearch = c["Cleaner Name"]?.toLowerCase().includes(search) || c["Email"]?.toLowerCase().includes(search);
       const matchStatus = status === "all" || (status === "active" && active) || (status === "inactive" && !active);
       return matchSearch && matchStatus;
